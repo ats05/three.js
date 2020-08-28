@@ -875,6 +875,11 @@ function WebGLRenderer( parameters ) {
 
 			renderer.renderInstances( geometry, drawStart, drawCount, geometry.maxInstancedCount );
 
+		} else if ( material.enableTransformFeedback ) {
+
+			// transform feedback
+			renderer.doTransformFeedback( drawStart, drawCount, material.transformFeedbackAttributes);
+
 		} else {
 
 			renderer.render( drawStart, drawCount );

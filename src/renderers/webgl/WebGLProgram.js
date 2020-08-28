@@ -776,6 +776,37 @@ function WebGLProgram( renderer, cacheKey, parameters ) {
 		gl.bindAttribLocation( program, 0, 'position' );
 
 	}
+	if ( parameters.enableTransformFeedback ) {
+
+		let varyings = [];
+		let names = [];
+		let object = gl.createTransformFeedback();
+		parameters.transformFeedbackAttributes.object = object;
+		gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, parameters.transformFeedbackAttributes.object);
+		let targets = parameters.transformFeedbackAttributes.targets;
+
+		// Create buffer for TF outputs
+		targets.forEach((target) => {
+			let resultArray = new Float32Array(target.length);
+			let buf = gl.createBuffer();
+			varyings.push({
+				name: target.name,
+				buffer: buf,
+				result: resultArray,
+			})
+
+			gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+			gl.bufferData(gl.ARRAY_BUFFER, resultArray, gl.DYNAMIC_COPY);
+    		gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+			names.push(target.name);
+		});
+
+		gl.transformFeedbackVaryings(program, names, gl.SEPARATE_ATTRIBS);
+		parameters.transformFeedbackAttributes.varyings = varyings;
+
+	}
+
 
 	gl.linkProgram( program );
 

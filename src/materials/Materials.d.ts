@@ -1,5 +1,6 @@
 export * from './ShadowMaterial';
 export * from './SpriteMaterial';
+export * from './TransformFeedbackMaterial';
 export * from './RawShaderMaterial';
 export * from './ShaderMaterial';
 export * from './PointsMaterial';

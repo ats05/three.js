@@ -1,7 +1,7 @@
 (function (global, factory) {
 	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
 	typeof define === 'function' && define.amd ? define(['exports'], factory) :
-	(global = global || self, factory(global.THREE = {}));
+	(global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.THREE = {}));
 }(this, (function (exports) { 'use strict';
 
 	// Polyfills
@@ -16267,6 +16267,35 @@
 
 		}
 
+		function doTransformFeedback( start, count, attributes) {
+
+
+			for (var i = 0; i < attributes.varyings.length; i++) {
+				var varying = attributes.varyings[i];
+				gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, i, varying.buffer);
+			}
+
+			gl.enable(gl.RASTERIZER_DISCARD);
+			gl.beginTransformFeedback(0);
+
+			gl.drawArrays( 0, 0, attributes.length);
+
+			gl.disable(gl.RASTERIZER_DISCARD);
+			gl.endTransformFeedback();
+
+			for (var i$1 = 0; i$1 < attributes.varyings.length; i$1++) {
+
+				var varying$1 = attributes.varyings[i$1];
+				gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, i$1, null);
+				gl.bindBuffer(34962, varying$1.buffer);
+				gl.getBufferSubData(34962, 0, varying$1.result);
+				gl.bindBuffer(34962, null);
+
+			}
+
+			info.update( count, mode );
+		}
+
 		function renderInstances( geometry, start, count, primcount ) {
 
 			if ( primcount === 0 ) { return; }
@@ -16303,6 +16332,7 @@
 		this.setMode = setMode;
 		this.setIndex = setIndex;
 		this.render = render;
+		this.doTransformFeedback = doTransformFeedback;
 		this.renderInstances = renderInstances;
 
 	}
@@ -18333,6 +18363,37 @@
 			gl.bindAttribLocation( program, 0, 'position' );
 
 		}
+		if ( parameters.enableTransformFeedback ) {
+
+			var varyings = [];
+			var names = [];
+			var object = gl.createTransformFeedback();
+			parameters.transformFeedbackAttributes.object = object;
+			gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, parameters.transformFeedbackAttributes.object);
+			var targets = parameters.transformFeedbackAttributes.targets;
+
+			// Create buffer for TF outputs
+			targets.forEach((target) => {
+				var resultArray = new Float32Array(target.length);
+				var buf = gl.createBuffer();
+				varyings.push({
+					name: target.name,
+					buffer: buf,
+					result: resultArray,
+				});
+
+				gl.bindBuffer(34962, buf);
+				gl.bufferData(34962, resultArray, gl.DYNAMIC_COPY);
+	    		gl.bindBuffer(34962, null);
+
+				names.push(target.name);
+			});
+
+			gl.transformFeedbackVaryings(program, names, gl.SEPARATE_ATTRIBS);
+			parameters.transformFeedbackAttributes.varyings = varyings;
+
+		}
+
 
 		gl.linkProgram( program );
 
@@ -18739,8 +18800,10 @@
 				rendererExtensionDrawBuffers: isWebGL2 || extensions.get( 'WEBGL_draw_buffers' ) !== null,
 				rendererExtensionShaderTextureLod: isWebGL2 || extensions.get( 'EXT_shader_texture_lod' ) !== null,
 
-				onBeforeCompile: material.onBeforeCompile
+				onBeforeCompile: material.onBeforeCompile,
 
+				enableTransformFeedback: material.enableTransformFeedback || false,
+				transformFeedbackAttributes: material.transformFeedbackAttributes,
 			};
 
 			return parameters;
@@ -24346,6 +24409,11 @@
 			} else if ( geometry.isInstancedBufferGeometry ) {
 
 				renderer.renderInstances( geometry, drawStart, drawCount, geometry.maxInstancedCount );
+
+			} else if ( material.enableTransformFeedback ) {
+
+				// transform feedback
+				renderer.doTransformFeedback( drawStart, drawCount, material.transformFeedbackAttributes);
 
 			} else {
 
@@ -32672,8 +32740,6 @@
 	CircleBufferGeometry.prototype = Object.create( BufferGeometry.prototype );
 	CircleBufferGeometry.prototype.constructor = CircleBufferGeometry;
 
-
-
 	var Geometries = /*#__PURE__*/Object.freeze({
 		__proto__: null,
 		WireframeGeometry: WireframeGeometry,
@@ -32772,6 +32838,26 @@
 	RawShaderMaterial.prototype.constructor = RawShaderMaterial;
 
 	RawShaderMaterial.prototype.isRawShaderMaterial = true;
+
+	/**
+	 * @author Atsushi Onozawa
+	 */
+
+	function TransformFeedbackMaterial( parameters ) {
+
+		RawShaderMaterial.call( this, parameters );
+
+		this.type = 'TransformFeedbackMaterial';
+
+
+	}
+
+	TransformFeedbackMaterial.prototype = Object.create( RawShaderMaterial.prototype );
+	TransformFeedbackMaterial.prototype.constructor = TransformFeedbackMaterial;
+
+	TransformFeedbackMaterial.prototype.isRawShaderMaterial = true;
+	TransformFeedbackMaterial.prototype.enableTransformFeedback = true;
+	TransformFeedbackMaterial.prototype.transformFeedbackAttributes = {};
 
 	/**
 	 * @author WestLangley / http://github.com/WestLangley
@@ -33701,12 +33787,11 @@
 
 	};
 
-
-
 	var Materials = /*#__PURE__*/Object.freeze({
 		__proto__: null,
 		ShadowMaterial: ShadowMaterial,
 		SpriteMaterial: SpriteMaterial,
+		TransformFeedbackMaterial: TransformFeedbackMaterial,
 		RawShaderMaterial: RawShaderMaterial,
 		ShaderMaterial: ShaderMaterial,
 		PointsMaterial: PointsMaterial,
@@ -38016,8 +38101,6 @@
 		return this;
 
 	};
-
-
 
 	var Curves = /*#__PURE__*/Object.freeze({
 		__proto__: null,
@@ -50469,6 +50552,7 @@
 	exports.TorusGeometry = TorusGeometry;
 	exports.TorusKnotBufferGeometry = TorusKnotBufferGeometry;
 	exports.TorusKnotGeometry = TorusKnotGeometry;
+	exports.TransformFeedbackMaterial = TransformFeedbackMaterial;
 	exports.Triangle = Triangle;
 	exports.TriangleFanDrawMode = TriangleFanDrawMode;
 	exports.TriangleStripDrawMode = TriangleStripDrawMode;

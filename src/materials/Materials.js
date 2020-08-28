@@ -1,5 +1,6 @@
 export { ShadowMaterial } from './ShadowMaterial.js';
 export { SpriteMaterial } from './SpriteMaterial.js';
+export { TransformFeedbackMaterial } from './TransformFeedbackMaterial.js';
 export { RawShaderMaterial } from './RawShaderMaterial.js';
 export { ShaderMaterial } from './ShaderMaterial.js';
 export { PointsMaterial } from './PointsMaterial.js';

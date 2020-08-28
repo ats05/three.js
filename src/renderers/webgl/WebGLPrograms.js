@@ -288,8 +288,10 @@ function WebGLPrograms( renderer, extensions, capabilities ) {
 			rendererExtensionDrawBuffers: isWebGL2 || extensions.get( 'WEBGL_draw_buffers' ) !== null,
 			rendererExtensionShaderTextureLod: isWebGL2 || extensions.get( 'EXT_shader_texture_lod' ) !== null,
 
-			onBeforeCompile: material.onBeforeCompile
+			onBeforeCompile: material.onBeforeCompile,
 
+			enableTransformFeedback: material.enableTransformFeedback || false,
+			transformFeedbackAttributes: material.transformFeedbackAttributes,
 		};
 
 		return parameters;

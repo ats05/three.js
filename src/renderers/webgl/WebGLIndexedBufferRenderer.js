@@ -31,6 +31,35 @@ function WebGLIndexedBufferRenderer( gl, extensions, info, capabilities ) {
 
 	}
 
+	function doTransformFeedback( start, count, attributes) {
+
+
+		for (let i = 0; i < attributes.varyings.length; i++) {
+			let varying = attributes.varyings[i];
+			gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, i, varying.buffer);
+		}
+
+		gl.enable(gl.RASTERIZER_DISCARD);
+		gl.beginTransformFeedback(gl.POINTS);
+
+		gl.drawArrays( gl.POINTS, 0, attributes.length);
+
+		gl.disable(gl.RASTERIZER_DISCARD);
+		gl.endTransformFeedback();
+
+		for (let i = 0; i < attributes.varyings.length; i++) {
+
+			let varying = attributes.varyings[i];
+			gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, i, null);
+			gl.bindBuffer(gl.ARRAY_BUFFER, varying.buffer);
+			gl.getBufferSubData(gl.ARRAY_BUFFER, 0, varying.result);
+			gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+		}
+
+		info.update( count, mode );
+	}
+
 	function renderInstances( geometry, start, count, primcount ) {
 
 		if ( primcount === 0 ) return;
@@ -67,6 +96,7 @@ function WebGLIndexedBufferRenderer( gl, extensions, info, capabilities ) {
 	this.setMode = setMode;
 	this.setIndex = setIndex;
 	this.render = render;
+	this.doTransformFeedback = doTransformFeedback;
 	this.renderInstances = renderInstances;
 
 }
