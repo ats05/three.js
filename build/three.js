@@ -15646,6 +15646,53 @@
 
 		}
 
+		function fence() {
+			return new Promise(function(resolve) {
+				var sync = gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE, 0);
+				gl.flush(); // Ensure the fence is submitted.
+				function check() {
+					var status = gl.getSyncParameter(sync, gl.SYNC_STATUS);
+					if (status == gl.SIGNALED) {
+						gl.deleteSync(sync);
+						resolve();
+					} else {
+						setTimeout(check, 0);
+					}
+				}
+				setTimeout(check, 0);
+			});
+		}
+
+
+		function doTransformFeedback( start, count, attributes) {
+
+
+			for (var i = 0; i < attributes.varyings.length; i++) {
+				var varying = attributes.varyings[i];
+				gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, i, varying.buffer);
+			}
+
+			gl.enable(gl.RASTERIZER_DISCARD);
+			gl.beginTransformFeedback(0);
+
+			gl.drawArrays( 0, 0, attributes.length);
+
+			gl.disable(gl.RASTERIZER_DISCARD);
+			gl.endTransformFeedback();
+
+			fence().then(function() {
+				for (var i = 0; i < attributes.varyings.length; i++) {
+					var varying = attributes.varyings[i];
+					gl.bindBuffer(gl.TRANSFORM_FEEDBACK_BUFFER, varying.buffer);
+					gl.getBufferSubData(gl.TRANSFORM_FEEDBACK_BUFFER, i, varying.result);
+					gl.bindBuffer(gl.TRANSFORM_FEEDBACK_BUFFER, null);
+
+				}
+			});
+
+			info.update( count, mode );
+		}
+
 		function renderInstances( geometry, start, count, primcount ) {
 
 			if ( primcount === 0 ) { return; }
@@ -15681,6 +15728,7 @@
 
 		this.setMode = setMode;
 		this.render = render;
+		this.doTransformFeedback = doTransformFeedback;
 		this.renderInstances = renderInstances;
 
 	}
@@ -18382,9 +18430,9 @@
 					result: resultArray,
 				});
 
-				gl.bindBuffer(34962, buf);
-				gl.bufferData(34962, resultArray, gl.DYNAMIC_COPY);
-	    		gl.bindBuffer(34962, null);
+				gl.bindBuffer(gl.TRANSFORM_FEEDBACK_BUFFER, buf);
+				gl.bufferData(gl.TRANSFORM_FEEDBACK_BUFFER, resultArray, gl.DYNAMIC_READ);
+	    		gl.bindBuffer(gl.TRANSFORM_FEEDBACK_BUFFER, null);
 
 				names.push(target.name);
 			});

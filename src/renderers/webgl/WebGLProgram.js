@@ -795,9 +795,9 @@ function WebGLProgram( renderer, cacheKey, parameters ) {
 				result: resultArray,
 			})
 
-			gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-			gl.bufferData(gl.ARRAY_BUFFER, resultArray, gl.DYNAMIC_COPY);
-    		gl.bindBuffer(gl.ARRAY_BUFFER, null);
+			gl.bindBuffer(gl.TRANSFORM_FEEDBACK_BUFFER, buf);
+			gl.bufferData(gl.TRANSFORM_FEEDBACK_BUFFER, resultArray, gl.DYNAMIC_READ);
+    		gl.bindBuffer(gl.TRANSFORM_FEEDBACK_BUFFER, null);
 
 			names.push(target.name);
 		});
