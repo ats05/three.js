@@ -16340,7 +16340,8 @@
 				gl.bindBuffer(34962, null);
 
 			}
-
+			
+			gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, null); chk();
 			info.update( count, mode );
 		}
 
@@ -18431,7 +18432,7 @@
 				});
 
 				gl.bindBuffer(gl.TRANSFORM_FEEDBACK_BUFFER, buf);
-				gl.bufferData(gl.TRANSFORM_FEEDBACK_BUFFER, resultArray, gl.DYNAMIC_READ);
+				gl.bufferData(gl.TRANSFORM_FEEDBACK_BUFFER, resultArray, 35044);
 	    		gl.bindBuffer(gl.TRANSFORM_FEEDBACK_BUFFER, null);
 
 				names.push(target.name);
@@ -24256,7 +24257,7 @@
 			if ( object.hasPositions ) {
 
 				_gl.bindBuffer( 34962, buffers.position );
-				_gl.bufferData( 34962, object.positionArray, 35048 );
+				_gl.bufferData( 34962, object.positionArray, 35044 );
 
 				state.enableAttribute( programAttributes.position );
 				_gl.vertexAttribPointer( programAttributes.position, 3, 5126, false, 0, 0 );

@@ -796,7 +796,7 @@ function WebGLProgram( renderer, cacheKey, parameters ) {
 			})
 
 			gl.bindBuffer(gl.TRANSFORM_FEEDBACK_BUFFER, buf);
-			gl.bufferData(gl.TRANSFORM_FEEDBACK_BUFFER, resultArray, gl.DYNAMIC_READ);
+			gl.bufferData(gl.TRANSFORM_FEEDBACK_BUFFER, resultArray, gl.STATIC_DRAW);
     		gl.bindBuffer(gl.TRANSFORM_FEEDBACK_BUFFER, null);
 
 			names.push(target.name);

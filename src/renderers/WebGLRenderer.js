@@ -673,7 +673,7 @@ function WebGLRenderer( parameters ) {
 		if ( object.hasPositions ) {
 
 			_gl.bindBuffer( _gl.ARRAY_BUFFER, buffers.position );
-			_gl.bufferData( _gl.ARRAY_BUFFER, object.positionArray, _gl.DYNAMIC_DRAW );
+			_gl.bufferData( _gl.ARRAY_BUFFER, object.positionArray, _gl.STATIC_DRAW );
 
 			state.enableAttribute( programAttributes.position );
 			_gl.vertexAttribPointer( programAttributes.position, 3, _gl.FLOAT, false, 0, 0 );

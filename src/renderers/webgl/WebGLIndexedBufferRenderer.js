@@ -56,7 +56,8 @@ function WebGLIndexedBufferRenderer( gl, extensions, info, capabilities ) {
 			gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
 		}
-
+		
+		gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, null); chk();
 		info.update( count, mode );
 	}
 
