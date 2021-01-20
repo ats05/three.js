@@ -789,15 +789,15 @@ function WebGLProgram( renderer, cacheKey, parameters ) {
 		targets.forEach((target) => {
 			let resultArray = new Float32Array(target.length);
 			let buf = gl.createBuffer();
+			gl.bindBuffer(gl.TRANSFORM_FEEDBACK_BUFFER, buf);
+			gl.bufferData(gl.TRANSFORM_FEEDBACK_BUFFER, resultArray, gl.STATIC_COPY);
+			gl.bindBuffer(gl.TRANSFORM_FEEDBACK_BUFFER, null);
+
 			varyings.push({
 				name: target.name,
 				buffer: buf,
 				result: resultArray,
 			})
-
-			gl.bindBuffer(gl.TRANSFORM_FEEDBACK_BUFFER, buf);
-			gl.bufferData(gl.TRANSFORM_FEEDBACK_BUFFER, resultArray, gl.STATIC_DRAW);
-    		gl.bindBuffer(gl.TRANSFORM_FEEDBACK_BUFFER, null);
 
 			names.push(target.name);
 		});

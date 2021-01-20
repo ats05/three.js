@@ -34,12 +34,13 @@ function WebGLIndexedBufferRenderer( gl, extensions, info, capabilities ) {
 	function doTransformFeedback( start, count, attributes) {
 
 
+		gl.enable(gl.RASTERIZER_DISCARD);
+		gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, attributes.object);
 		for (let i = 0; i < attributes.varyings.length; i++) {
 			let varying = attributes.varyings[i];
 			gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, i, varying.buffer);
 		}
 
-		gl.enable(gl.RASTERIZER_DISCARD);
 		gl.beginTransformFeedback(gl.POINTS);
 
 		gl.drawArrays( gl.POINTS, 0, attributes.length);
@@ -56,7 +57,7 @@ function WebGLIndexedBufferRenderer( gl, extensions, info, capabilities ) {
 			gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
 		}
-		
+
 		gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, null); chk();
 		info.update( count, mode );
 	}

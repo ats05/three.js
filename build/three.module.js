@@ -16305,12 +16305,13 @@ function WebGLIndexedBufferRenderer( gl, extensions, info, capabilities ) {
 	function doTransformFeedback( start, count, attributes) {
 
 
+		gl.enable(gl.RASTERIZER_DISCARD);
+		gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, attributes.object);
 		for (let i = 0; i < attributes.varyings.length; i++) {
 			let varying = attributes.varyings[i];
 			gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, i, varying.buffer);
 		}
 
-		gl.enable(gl.RASTERIZER_DISCARD);
 		gl.beginTransformFeedback(0);
 
 		gl.drawArrays( 0, 0, attributes.length);
@@ -16327,7 +16328,7 @@ function WebGLIndexedBufferRenderer( gl, extensions, info, capabilities ) {
 			gl.bindBuffer(34962, null);
 
 		}
-		
+
 		gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, null); chk();
 		info.update( count, mode );
 	}
@@ -18412,15 +18413,15 @@ function WebGLProgram( renderer, cacheKey, parameters ) {
 		targets.forEach((target) => {
 			let resultArray = new Float32Array(target.length);
 			let buf = gl.createBuffer();
+			gl.bindBuffer(gl.TRANSFORM_FEEDBACK_BUFFER, buf);
+			gl.bufferData(gl.TRANSFORM_FEEDBACK_BUFFER, resultArray, gl.STATIC_COPY);
+			gl.bindBuffer(gl.TRANSFORM_FEEDBACK_BUFFER, null);
+
 			varyings.push({
 				name: target.name,
 				buffer: buf,
 				result: resultArray,
 			});
-
-			gl.bindBuffer(gl.TRANSFORM_FEEDBACK_BUFFER, buf);
-			gl.bufferData(gl.TRANSFORM_FEEDBACK_BUFFER, resultArray, 35044);
-    		gl.bindBuffer(gl.TRANSFORM_FEEDBACK_BUFFER, null);
 
 			names.push(target.name);
 		});
